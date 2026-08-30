@@ -335,7 +335,19 @@
 
     <script src="config.js"></script>
     <script src="script.js"></script>
-    import { SpeedInsights } from "@vercel/speed-insights/next"
-    import { Analytics } from "@vercel/analytics/next"
+
+    <!-- Vercel Web Analytics & Speed Insights (plain-HTML integration).
+         Only reports data once this site is actually deployed on Vercel —
+         these script paths are served by Vercel's edge network, so they'll
+         404 harmlessly on any other host or when running locally. -->
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+
+    <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>
