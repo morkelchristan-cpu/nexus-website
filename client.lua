@@ -1,0 +1,10 @@
+CreateThread(function()
+    SetNuiFocus(true, true)
+    SetNuiFocusKeepInput(false)
+end)
+
+RegisterNuiCallback('nuiReady', function(data, cb)
+    SetNuiFocus(true, true)
+    SetNuiFocusKeepInput(false)
+    cb('ok')
+end)
