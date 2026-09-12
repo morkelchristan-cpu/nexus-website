@@ -38,48 +38,63 @@ window.SERVER_CONFIG = {
     // Swap these placeholder URLs for real Discord avatar links any time,
     // e.g. right-click a Discord profile picture → "Copy Image Address".
     staffMembers: [
-        { name: "its.valid", role: "Owner & Lead Dev", discord: "its.valid", bio: "Server administration & framework architecture.", avatar: "https://i.postimg.cc/Xq47CMm6/images.jpg" },
-        { name: "Alex R.", role: "Head Administrator", discord: "alex_rp", bio: "Staff management & ban appeals.", avatar: "https://api.dicebear.com/9.x/identicon/svg?seed=AlexR&backgroundColor=0b0f17" },
-        { name: "Sarah K.", role: "Community Moderator", discord: "sarahk", bio: "Discord oversight & in-game support.", avatar: "https://api.dicebear.com/9.x/identicon/svg?seed=SarahK&backgroundColor=0b0f17" }
+        { name: "valid.designs", role: "Owner & Lead Dev", discord: "its.valid", bio: "Server administration & framework architecture.", avatar: "https://i.postimg.cc/kXqdFQt7/Gemini-Generated-Image-(2).jpg" },
+        { name: "Thor", role: "Owner of FR Discord", discord: "cpteam6373", bio: "FR Discord administration.", avatar: "https://i.postimg.cc/QCBjLhhX/image-2026-09-12-231646788.png" },
+        { name: "MazeRunnerGlade", role: "Staff Management", discord: "mazerunnerglade", bio: "Staff Oversight.", avatar: "https://i.postimg.cc/3xZNFrR3/image-2026-09-12-231836031.png" },
+        { name: "Liam Ross/ Stefan Ross", role: "Staff Coordinator", discord: "liam_ross_69", bio: "Coordinator for the staff team.", avatar: "https://i.postimg.cc/50D226PS/image-2026-09-12-231911252.png" },
+        { name: "MagnumClassic", role: "Administrator", discord: "magnumclassic1", bio: "Administration of Nexus.", avatar: "https://i.postimg.cc/YSZH1TQV/image-2026-09-12-232151302.png" },
+        { name: "PEP", role: "Administrator", discord: "pep9853", bio: "Administration of Nexus.", avatar: "https://i.postimg.cc/vZGHTRvj/image-2026-09-12-231943390.png" },
+        { name: "Barris_ZA", role: "Tester", discord: "barris_za", bio: "Official Tester.", avatar: "https://i.postimg.cc/cHtd2dsn/image-2026-09-12-232010976.png" }
     ],
-
 devLogs: [
-    {
-        date: "August 2026 • V2.4 Release",
-        title: "Economy Overhaul & Supabase Sync",
-        desc: "Deployed new database synchronization layers, reduced server-side tick overhead, and introduced dynamic banking interest rates.",
-        latest: true
-    },
-    {
-        date: "August 2026 • Patch 2.3.5",
-        title: "SQL Query Optimization & Deadlock Fixes",
-        desc: "Resolved high-concurrency database deadlocks by refactoring async queries and configuring connection pool limits on MariaDB.",
-        latest: false
-    },
-    {
-        date: "August 2026 • Patch 2.3.2",
-        title: "Automated Discord Logging & Webhooks",
-        desc: "Integrated GitHub action webhooks and server event telemetry into dedicated development and audit channels.",
-        latest: false
-    },
-    {
-        date: "August 2026 • V2.3 Release",
-        title: "VPS Migration & Network Security",
-        desc: "Migrated server assets to a dedicated Linux VPS on Azure, established secure SSH tunneling, and updated firewall routing rules.",
-        latest: false
-    },
-    {
-        date: "July 2026 • Patch 2.2.1",
-        title: "Custom UI Components & React Integration",
-        desc: "Overhauled the core user interface with custom React components, smooth CSS animations, and improved responsive layouts.",
-        latest: false
-    },
-    {
-        date: "July 2026 • V2.2 Release",
-        title: "Qbox Core Framework Refactor",
-        desc: "Upgraded core player scripts, rewritten resource dependencies for Qbox compatibility, and streamlined player data persistent storage.",
-        latest: false
-    }
+{
+date: "September 2026 • V2.6 Release",
+title: "Advanced Banking System & Dynamic NPC Robberies",
+desc: "Implemented a fully revamped banking system with multi-account management, credit limits, and automated transaction histories, alongside dynamic NPC store robberies with escalating police response triggers.",
+latest: true
+},
+{
+date: "September 2026 • Patch 2.5.1",
+title: "VPS Node Migration & Load Balancing",
+desc: "Migrated infrastructure to a high-performance VPS setup with optimized network routing, lower latency endpoints, and seamless failover handling for heavy concurrency.",
+latest: false
+},
+{
+date: "August 2026 • V2.4 Release",
+title: "Economy Overhaul & Supabase Sync",
+desc: "Deployed new database synchronization layers, reduced server-side tick overhead, and introduced dynamic banking interest rates.",
+latest: false
+},
+{
+date: "August 2026 • Patch 2.3.5",
+title: "SQL Query Optimization & Deadlock Fixes",
+desc: "Resolved high-concurrency database deadlocks by refactoring async queries and configuring connection pool limits on MariaDB.",
+latest: false
+},
+{
+date: "August 2026 • Patch 2.3.2",
+title: "Automated Discord Logging & Webhooks",
+desc: "Integrated GitHub action webhooks and server event telemetry into dedicated development and audit channels.",
+latest: false
+},
+{
+date: "August 2026 • V2.3 Release",
+title: "VPS Migration & Network Security",
+desc: "Migrated server assets to a dedicated Linux VPS on Azure, established secure SSH tunneling, and updated firewall routing rules.",
+latest: false
+},
+{
+date: "July 2026 • Patch 2.2.1",
+title: "Custom UI Components & React Integration",
+desc: "Overhauled the core user interface with custom React components, smooth CSS animations, and improved responsive layouts.",
+latest: false
+},
+{
+date: "July 2026 • V2.2 Release",
+title: "Qbox Core Framework Refactor",
+desc: "Upgraded core player scripts, rewritten resource dependencies for Qbox compatibility, and streamlined player data persistent storage.",
+latest: false
+}
 ],
 
     // Each media card can have an "image" URL (a screenshot or clip
