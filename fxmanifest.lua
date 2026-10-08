@@ -10,6 +10,7 @@ ui_page 'index.html'
 files {
     'index.html',
     'config.js',
+    'i18n.js',
     'style.css',
     'script.js',
     'nexus-logo.jpg'

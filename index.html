@@ -1,470 +1,633 @@
 <!DOCTYPE html>
-<html lang="en" class="dark gate-locked">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus RolePlay | Official Community Portal</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
+    <title>Nexus RolePlay V1 — South African FiveM Roleplay</title>
+    <meta name="description" content="Nexus RolePlay V1 is a South African FiveM roleplay server with a living economy, Police & EMS, 3D voice and a dedicated staff team. Available in English, Afrikaans and French.">
+    <meta name="theme-color" content="#0b0c0e">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Nexus RolePlay V1 — South African FiveM Roleplay">
+    <meta property="og:description" content="A living economy, Police & EMS, 3D voice and a dedicated staff team. EN · AF · FR.">
+    <meta property="og:image" content="nexus-logo.jpg">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="nexus-logo.jpg">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <!-- Critical CSS: guarantees the guard gate covers the screen and the page underneath can't scroll, even before the Tailwind CDN script and its classes have finished loading. -->
-    <style>
-      html.gate-locked, html.gate-locked body {
-        overflow: hidden !important;
-        height: 100%;
-      }
-      #guard-gate {
-        position: fixed;
-        inset: 0;
-        z-index: 999;
-        width: 100vw;
-        height: 100vh;
-        background: #030508;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    </style>
+
+    <script src="config.js"></script>
+    <script src="i18n.js"></script>
+    <!-- Applies theme + entry-gate state before first paint so nothing flashes. -->
     <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              nexusBg: '#05070a',
-              nexusCard: '#0b0f17',
-              nexusBorder: '#1e293b',
-              nexusPrimary: '#3b82f6',
-              nexusHover: '#2563eb',
-              nexusMuted: '#94a3b8',
-            },
-            fontFamily: {
-              sans: ['Plus Jakarta Sans', 'sans-serif'],
-              display: ['Space Grotesk', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-            }
-          }
-        }
-      }
+      (function () {
+        var d = document.documentElement;
+        try {
+          var th = localStorage.getItem("nexus_theme");
+          if (th === "light" || th === "dark") d.setAttribute("data-theme", th);
+        } catch (e) {}
+        var skip = window.SERVER_CONFIG && window.SERVER_CONFIG.entryGate === false;
+        try { if (sessionStorage.getItem("nx_entered") === "1") skip = true; } catch (e) {}
+        d.classList.add(skip ? "no-gate" : "gate-open");
+      })();
     </script>
   </head>
-  <body class="bg-nexusBg text-slate-100 font-sans min-h-screen flex flex-col selection:bg-nexusPrimary selection:text-white">
-    <!-- LANGUAGE BAR -->
-    <div id="language-bar" style="background: rgba(3, 5, 8, 0.95); border-bottom: 1px solid #1e293b; color: #fff; padding: 8px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; z-index: 45; position: sticky; top: 0;">
-      <span style="color: #94a3b8; font-weight: 600;">🌐 Language:</span>
-      <button onclick="switchLanguage('en')" id="btn-en" style="background: #3b82f6; color: white; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">ENG</button>
-      <button onclick="switchLanguage('fr')" id="btn-fr" style="background: #1f2937; color: #94a3b8; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">FR</button>
-    </div>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
     <!-- Ambient background -->
-    <canvas id="bg-canvas"></canvas>
-    <div id="cursor-glow"></div>
-    <!-- GUARD GATE OVERLAY -->
-    <div id="guard-gate" class="fixed inset-0 z-50 bg-[#030508] flex flex-col items-center justify-center cursor-pointer transition-all duration-700">
-      <div class="text-center space-y-6 select-none animate-in fade-in zoom-in-95 duration-500">
-        <p class="text-[10px] tracking-[0.3em] font-extrabold uppercase text-nexusPrimary" data-i18n="guard_welcome">Welcome To</p>
-        <div class="relative w-48 h-48 mx-auto flex items-center justify-center">
-          <div class="absolute inset-0 bg-nexusPrimary/10 rounded-full blur-2xl animate-pulse"></div>
-          <img src="nexus-logo.jpg" alt="Nexus Logo" class="relative z-10 w-full h-full object-contain drop-shadow-[0_0_25px_rgba(59,130,246,0.3)] rounded-2xl">
+    <div class="backdrop" aria-hidden="true">
+      <div class="aurora"><span></span><span></span><span></span></div>
+      <div class="grid-bg"></div>
+      <div class="noise"></div>
+    </div>
+
+    <!-- Shared SVG defs -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--accent)" stop-opacity=".35"/>
+          <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="za-tri"><path d="M0,0l4.5,3-4.5,3"/></clipPath>
+      </defs>
+      <symbol id="flag-za" viewBox="0 0 9 6">
+        <path fill="#E03C31" d="M0,0h9v3h-9z"/>
+        <path fill="#001489" d="M0,3h9v3h-9z"/>
+        <path fill="none" stroke="#FFF" stroke-width="2" d="M0,0l4.5,3-4.5,3m4.5-3h9"/>
+        <path fill="#000" stroke="#FFB81C" stroke-width="2" clip-path="url(#za-tri)" d="M0,0l4.5,3-4.5,3z"/>
+        <path fill="none" stroke="#007749" stroke-width="1.2" d="M0,0l4.5,3-4.5,3m4.5-3h9"/>
+      </symbol>
+    </svg>
+
+    <!-- ===================== ENTRY GATE ===================== -->
+    <div id="gate" class="gate" tabindex="0" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+      <div class="gate-inner">
+        <p class="gate-welcome" data-i18n="gate_welcome">Welcome to</p>
+        <div class="gate-logo">
+          <span class="gate-ring"></span>
+          <span class="gate-ring gate-ring--2"></span>
+          <img src="nexus-logo.jpg" alt="Nexus RolePlay logo">
         </div>
-        <div class="space-y-1">
-          <h1 class="font-display text-3xl md:text-5xl font-bold tracking-wider text-white uppercase">NEXUS</h1>
-          <p class="font-display text-xl md:text-2xl font-bold tracking-widest text-gradient-shimmer uppercase" data-i18n="guard_subtitle">RolePlay V1</p>
+        <h1 class="gate-title" id="gate-title">NEXUS</h1>
+        <p class="gate-sub shiny-text">RolePlay V1</p>
+
+        <div class="gate-lang">
+          <span data-i18n="gate_lang">Choose your language</span>
+          <div class="seg" role="radiogroup" aria-label="Language">
+            <span class="seg-pill"></span>
+            <button type="button" data-lang="en" role="radio">EN</button>
+            <button type="button" data-lang="af" role="radio">AF</button>
+            <button type="button" data-lang="fr" role="radio">FR</button>
+          </div>
         </div>
-        <div class="pt-8">
-          <span class="text-[11px] tracking-[0.25em] font-bold text-nexusMuted uppercase animate-pulse" data-i18n="guard_click">Click Anywhere To Enter</span>
-        </div>
+
+        <p class="gate-enter"><span data-i18n="gate_enter">Click anywhere to enter</span><small data-i18n="gate_hint">or press Enter</small></p>
       </div>
     </div>
-    <!-- Top Navigation Bar -->
-    <header class="sticky top-[41px] z-40 bg-nexusBg/80 backdrop-blur-md border-b border-nexusBorder">
-      <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div class="flex items-center gap-3 cursor-pointer" onclick="scrollToSection('hero-section')">
-          <div class="w-11 h-11 rounded-xl bg-nexusCard border border-nexusBorder overflow-hidden flex items-center justify-center shadow-md">
-            <img src="nexus-logo.jpg" alt="Nexus Logo" class="w-full h-full object-cover">
-          </div>
-          <div>
-            <h1 class="font-display font-bold text-sm tracking-wide text-white">NEXUS ROLEPLAY</h1>
-            <p class="text-[10px] text-nexusMuted uppercase tracking-widest font-semibold" data-i18n="nav_community">FiveM Community</p>
-          </div>
-        </div>
-        <nav class="hidden lg:flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider">
-          <button onclick="scrollToSection('hero-section')" class="text-nexusPrimary hover:text-white transition cursor-pointer" data-i18n="nav_home">Home</button>
-          <button onclick="scrollToSection('status-section')" class="text-nexusMuted hover:text-white transition cursor-pointer" data-i18n="nav_status">Status</button>
-          <button onclick="scrollToSection('rules-section')" class="text-nexusMuted hover:text-white transition cursor-pointer" data-i18n="nav_rules">Rules</button>
-          <button onclick="scrollToSection('media-section')" class="text-nexusMuted hover:text-white transition cursor-pointer" data-i18n="nav_media">Media</button>
-          <button onclick="scrollToSection('development-section')" class="text-nexusMuted hover:text-white transition cursor-pointer" data-i18n="nav_devlogs">Dev Logs</button>
-          <button onclick="scrollToSection('staff-section')" class="text-nexusMuted hover:text-white transition cursor-pointer" data-i18n="nav_staff">Staff</button>
-          <button onclick="scrollToSection('contact-section')" class="text-nexusMuted hover:text-white transition cursor-pointer" data-i18n="nav_support">Support</button>
+
+    <!-- ===================== NAVBAR ===================== -->
+    <header class="nav" id="nav">
+      <div class="nav-inner">
+        <a class="brand" href="#home" aria-label="Nexus RolePlay">
+          <img src="nexus-logo.jpg" alt="">
+          <span class="brand-text"><strong>Nexus</strong><small>RolePlay V1</small></span>
+        </a>
+
+        <nav class="nav-links" id="nav-links" aria-label="Primary">
+          <span class="nav-indicator" id="nav-indicator"></span>
+          <a href="#features" data-i18n="nav_features">Features</a>
+          <a href="#status" data-i18n="nav_status">Status</a>
+          <a href="#rules" data-i18n="nav_rules">Rules</a>
+          <a href="#media" data-i18n="nav_media">Media</a>
+          <a href="#updates" data-i18n="nav_updates">Updates</a>
+          <a href="#staff" data-i18n="nav_staff">Staff</a>
+          <a href="#support" data-i18n="nav_support">Support</a>
         </nav>
-        <div class="flex items-center gap-4">
-          <a href="https://discord.gg/WsZfUBA5Jn" target="_blank" data-magnetic class="bg-nexusPrimary hover:bg-nexusHover text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-nexusPrimary/20 flex items-center gap-2">
-            <i class="fa-brands fa-discord"></i>
-            <span data-i18n="nav_connect">Connect</span>
+
+        <div class="nav-actions">
+          <button type="button" class="search-btn" data-open-cmdk data-i18n-aria="nav_search" aria-label="Search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span data-i18n="nav_search">Search</span>
+            <kbd>Ctrl K</kbd>
+          </button>
+          <div class="seg seg--nav" role="radiogroup" aria-label="Language">
+            <span class="seg-pill"></span>
+            <button type="button" data-lang="en" role="radio">EN</button>
+            <button type="button" data-lang="af" role="radio">AF</button>
+            <button type="button" data-lang="fr" role="radio">FR</button>
+          </div>
+          <button type="button" class="icon-btn theme-btn" data-theme-toggle data-i18n-aria="nav_theme" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon"></i><i class="fa-solid fa-sun"></i>
+          </button>
+          <a class="btn btn-primary btn-sm nav-play" data-connect-link href="#">
+            <i class="fa-solid fa-play"></i><span data-i18n="nav_play">Play now</span>
           </a>
+          <button type="button" class="icon-btn menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sheet" data-i18n-aria="nav_menu" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
         </div>
       </div>
     </header>
-    <!-- Main Content Flow -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-12 space-y-24">
-      <!-- 1. Hero Section -->
-      <section id="hero-section" class="relative pt-8 pb-12 overflow-hidden rounded-3xl bg-gradient-to-br from-nexusCard via-[#070b12] to-nexusBg border border-nexusBorder p-8 md:p-14 shadow-2xl">
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-nexusPrimary/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div class="lg:col-span-7 space-y-8 text-left">
-            <div data-reveal class="reveal inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-nexusPrimary/10 border border-nexusPrimary/30 text-nexusPrimary text-xs font-bold tracking-wider uppercase">
-              <span class="w-2 h-2 rounded-full bg-nexusPrimary animate-ping"></span>
-              <span data-i18n="hero_badge">V1 Framework Live • 48 Slot Optimized</span>
-            </div>
-            <div data-reveal data-reveal-delay="100" class="reveal space-y-4">
-              <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
-                <span class="text-gradient-shimmer">Nexus</span> Roleplay.
-              </h1>
-              <p class="text-sm sm:text-base text-nexusMuted leading-relaxed max-w-xl" data-i18n="hero_desc">Step into a living economy featuring custom scripted frameworks, dedicated emergency dispatch infrastructure, and serious, story-driven civilians.</p>
-            </div>
-            <div data-reveal data-reveal-delay="200" class="reveal flex flex-wrap items-center gap-4 pt-2">
-              <a href="#" data-connect-link data-magnetic class="px-7 py-4 rounded-xl bg-nexusPrimary hover:bg-nexusHover text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-lg shadow-nexusPrimary/25 flex items-center gap-2.5 cursor-pointer">
-                <i class="fa-solid fa-play text-xs"></i>
-                <span data-i18n="hero_launch">Launch FiveM Server</span>
-              </a>
-              <a href="https://discord.gg/WsZfUBA5Jn" target="_blank" data-magnetic class="px-7 py-4 rounded-xl bg-nexusCard border border-nexusBorder hover:border-nexusPrimary/50 text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 flex items-center gap-2.5 cursor-pointer">
-                <i class="fa-brands fa-discord text-nexusPrimary"></i>
-                <span data-i18n="hero_discord">Join Discord</span>
-              </a>
-            </div>
-            <div data-reveal data-reveal-delay="300" class="reveal grid grid-cols-3 gap-4 pt-6 border-t border-nexusBorder/60 max-w-lg">
-              <div>
-                <span class="text-[10px] text-nexusMuted uppercase tracking-wider block mb-0.5" data-i18n="stat_status_lbl">Status</span>
-                <span id="hero-live-status-text" class="text-xs font-bold text-nexusMuted flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-nexusMuted animate-pulse"></span>
-                  <span data-i18n="checking">Checking…</span>
-                </span>
-              </div>
-              <div>
-                <span class="text-[10px] text-nexusMuted uppercase tracking-wider block mb-0.5" data-i18n="stat_pop_lbl">Population</span>
-                <span id="hero-live-players" class="text-xs font-bold text-white font-mono">-- / --</span>
-              </div>
-              <div>
-                <span class="text-[10px] text-nexusMuted uppercase tracking-wider block mb-0.5" data-i18n="stat_addr_lbl">Address</span>
-                <span data-server-address class="text-xs font-bold text-white font-mono">--</span>
-              </div>
-            </div>
+
+    <!-- Mobile menu sheet -->
+    <div class="sheet" id="sheet" aria-hidden="true">
+      <div class="sheet-panel">
+        <nav class="sheet-links">
+          <a href="#features" data-i18n="nav_features">Features</a>
+          <a href="#join" data-i18n="nav_join">Join</a>
+          <a href="#status" data-i18n="nav_status">Status</a>
+          <a href="#rules" data-i18n="nav_rules">Rules</a>
+          <a href="#media" data-i18n="nav_media">Media</a>
+          <a href="#updates" data-i18n="nav_updates">Updates</a>
+          <a href="#staff" data-i18n="nav_staff">Staff</a>
+          <a href="#faq" data-i18n="nav_faq">FAQ</a>
+          <a href="#support" data-i18n="nav_support">Support</a>
+        </nav>
+        <div class="sheet-row">
+          <div class="seg" role="radiogroup" aria-label="Language">
+            <span class="seg-pill"></span>
+            <button type="button" data-lang="en" role="radio">EN</button>
+            <button type="button" data-lang="af" role="radio">AF</button>
+            <button type="button" data-lang="fr" role="radio">FR</button>
           </div>
-          <div data-reveal data-reveal-delay="150" class="reveal lg:col-span-5">
-            <div class="glow-card bg-nexusBg/90 backdrop-blur border border-nexusBorder rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-6" onmousemove="this.style.setProperty('--mx', (event.offsetX)+'px'); this.style.setProperty('--my', (event.offsetY)+'px')">
-              <div class="absolute -top-12 -right-12 w-36 h-36 bg-nexusPrimary/15 rounded-full blur-2xl"></div>
-              <div class="flex items-center justify-between border-b border-nexusBorder pb-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-nexusCard border border-nexusBorder overflow-hidden flex items-center justify-center shadow">
-                    <img src="nexus-logo.jpg" alt="Nexus Logo" class="w-full h-full object-cover">
-                  </div>
-                  <div>
-                    <h4 class="font-bold text-white text-sm" data-i18n="card_title">Nexus Main Node</h4>
-                    <p data-server-address class="text-[10px] text-nexusMuted font-mono">--</p>
-                  </div>
-                </div>
-                <span id="quickcard-badge" class="px-2.5 py-1 rounded-full bg-nexusBorder/40 border border-nexusBorder text-nexusMuted text-[10px] font-bold uppercase" data-i18n="checking">Checking</span>
-              </div>
-              <!-- Live vitals sparkline -->
-              <div class="flex items-end justify-between bg-nexusCard rounded-xl border border-nexusBorder p-3">
-                <span class="text-[10px] text-nexusMuted uppercase tracking-wider" data-i18n="live_vitals">Live Vitals</span>
-                <div id="pulse-line"></div>
-              </div>
-              <div class="space-y-3">
-                <div class="flex items-center justify-between text-xs p-3 bg-nexusCard rounded-xl border border-nexusBorder">
-                  <span class="text-nexusMuted" data-i18n="feat_framework">Active Framework</span>
-                  <span class="font-bold text-white">QBOX / Custom V1</span>
-                </div>
-                <div class="flex items-center justify-between text-xs p-3 bg-nexusCard rounded-xl border border-nexusBorder">
-                  <span class="text-nexusMuted" data-i18n="feat_voice">Voice Synchronization</span>
-                  <span class="font-bold text-emerald-400">PMA-Voice 3D</span>
-                </div>
-                <div class="flex items-center justify-between text-xs p-3 bg-nexusCard rounded-xl border border-nexusBorder">
-                  <span class="text-nexusMuted" data-i18n="feat_anticheat">Anti-Cheat Protection</span>
-                  <span class="font-bold text-nexusPrimary" data-i18n="feat_shield">Active Shield</span>
-                </div>
-              </div>
-              <div class="pt-2">
-                <a href="#" data-cfx-link data-magnetic class="w-full py-3 bg-nexusCard hover:bg-nexusBorder border border-nexusBorder hover:border-nexusPrimary/50 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow">
-                  <i class="fa-solid fa-terminal text-nexusPrimary text-[10px]"></i>
-                  <span data-i18n="card_launcher">Direct Connect Launcher</span>
-                </a>
-              </div>
-            </div>
-          </div>
+          <button type="button" class="icon-btn theme-btn" data-theme-toggle data-i18n-aria="nav_theme" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon"></i><i class="fa-solid fa-sun"></i>
+          </button>
+          <button type="button" class="icon-btn" data-open-cmdk data-i18n-aria="nav_search" aria-label="Search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
         </div>
-      </section>
-      <!-- 2. Telemetry Grid -->
-      <section id="status-section" class="space-y-8">
-        <div class="border-b border-nexusBorder pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold uppercase tracking-wider mb-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span data-i18n="telemetry_badge">Live Telemetry Grid</span>
-            </div>
-            <h2 class="font-display text-2xl font-bold text-white" data-i18n="telemetry_title">System Status & Diagnostics</h2>
-            <p class="text-xs text-nexusMuted mt-1">
-              <span data-i18n="telemetry_desc_pre">Queried directly from</span>
-              <span data-server-address class="font-mono text-nexusPrimary">--</span>
-              <span data-i18n="telemetry_desc_post">every 15 seconds — no manual updates needed.</span>
-            </p>
-          </div>
-          <div class="flex items-center gap-3">
-            <span id="refresh-counter-badge" class="text-[11px] text-nexusMuted bg-nexusCard border border-nexusBorder px-3 py-2 rounded-xl flex items-center gap-1.5">
-              <i class="fa-regular fa-clock text-nexusPrimary"></i>
-              <span data-i18n="refreshes_in">Refreshes in</span>
-              <span id="countdown-timer" class="font-bold text-white font-mono">30s</span>
-            </span>
-            <button onclick="manualRefreshStatus()" id="manual-refresh-btn" data-magnetic class="bg-nexusCard hover:bg-nexusBorder border border-nexusBorder hover:border-nexusPrimary/50 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-lg">
-              <i id="refresh-icon" class="fa-solid fa-rotate text-nexusPrimary"></i>
-              <span data-i18n="refresh_now">Refresh Now</span>
-            </button>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div data-reveal class="reveal bg-nexusCard border border-nexusBorder rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-nexusPrimary/40 transition-colors duration-300">
-            <div class="absolute top-0 right-0 p-6 text-nexusBorder opacity-40 group-hover:scale-110 transition duration-300">
-              <i class="fa-solid fa-signal text-3xl"></i>
-            </div>
-            <span class="text-[10px] uppercase font-semibold text-nexusMuted block mb-1" data-i18n="grid_status_lbl">Active Server Status</span>
-            <div id="status-card-badge" class="text-2xl font-bold text-nexusMuted mb-2 flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-nexusMuted animate-pulse"></span>
-              <span data-i18n="checking">CHECKING</span>
-            </div>
-            <span id="status-subtext" class="text-[11px] text-nexusMuted font-medium" data-i18n="grid_status_sub">Contacting server address…</span>
-          </div>
-          <div data-reveal data-reveal-delay="80" class="reveal bg-nexusCard border border-nexusBorder rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-nexusPrimary/40 transition-colors duration-300">
-            <div class="absolute top-0 right-0 p-6 text-nexusBorder opacity-40 group-hover:scale-110 transition duration-300">
-              <i class="fa-solid fa-users text-3xl"></i>
-            </div>
-            <span class="text-[10px] uppercase font-semibold text-nexusMuted block mb-1" data-i18n="grid_players_lbl">Active Server Players</span>
-            <div id="status-card-players" class="text-2xl font-bold text-white mb-2 font-mono">-- / --</div>
-            <span class="text-[11px] text-nexusPrimary font-medium" data-i18n="grid_players_sub">Live Player Count</span>
-          </div>
-          <div data-reveal data-reveal-delay="160" class="reveal bg-nexusCard border border-nexusBorder rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-nexusPrimary/40 transition-colors duration-300">
-            <div class="absolute top-0 right-0 p-6 text-nexusBorder opacity-40 group-hover:scale-110 transition duration-300">
-              <i class="fa-solid fa-clock text-3xl"></i>
-            </div>
-            <span class="text-[10px] uppercase font-semibold text-nexusMuted block mb-1" data-i18n="grid_query_lbl">Query Result</span>
-            <div id="status-card-uptime" class="text-2xl font-bold text-white mb-2">--</div>
-            <span id="status-card-uptime-sub" class="text-[11px] text-nexusMuted font-medium" data-i18n="grid_query_sub">Waiting on first check</span>
-          </div>
-          <div data-reveal data-reveal-delay="240" class="reveal bg-nexusCard border border-nexusBorder rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-nexusPrimary/40 transition-colors duration-300">
-            <div class="absolute top-0 right-0 p-6 text-nexusBorder opacity-40 group-hover:scale-110 transition duration-300">
-              <i class="fa-solid fa-server text-3xl"></i>
-            </div>
-            <span class="text-[10px] uppercase font-semibold text-nexusMuted block mb-1" data-i18n="grid_addr_lbl">Server Address</span>
-            <div data-server-address class="text-lg font-bold text-white mb-2 font-mono truncate">--</div>
-            <span class="text-[11px] text-nexusPrimary font-medium" data-i18n="grid_addr_sub">Set in config.js</span>
-          </div>
-        </div>
-      </section>
-      <!-- 4. Rules Section -->
-      <section id="rules-section" class="space-y-8">
-        <div class="border-b border-nexusBorder pb-6">
-          <h2 class="font-display text-2xl font-bold text-white" data-i18n="rules_title">Community & Server Rules</h2>
-          <p class="text-xs text-nexusMuted mt-1" data-i18n="rules_desc">Review our structured code of conduct to ensure fair, immersive, and high-quality roleplay for all citizens.</p>
-        </div>
-        <div id="server-rules-container" class="space-y-4"></div>
-      </section>
-      <!-- 5. Media Section -->
-      <section id="media-section" class="space-y-8">
-        <div class="border-b border-nexusBorder pb-6">
-          <h2 class="font-display text-2xl font-bold text-white" data-i18n="media_title">Community Media Gallery</h2>
-          <p class="text-xs text-nexusMuted mt-1" data-i18n="media_desc">Check out community screenshots, highlights, and promotional media.</p>
-        </div>
-        <div id="media-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-      </section>
-      <!-- 6. Development Logs -->
-      <section id="development-section" class="space-y-8">
-        <div class="border-b border-nexusBorder pb-6">
-          <h2 class="font-display text-2xl font-bold text-white" data-i18n="devlogs_title">Development Logs</h2>
-          <p class="text-xs text-nexusMuted mt-1" data-i18n="devlogs_desc">Track the latest updates, script optimizations, and framework patches.</p>
-        </div>
-        <div class="bg-nexusCard border border-nexusBorder rounded-2xl p-8 shadow-xl space-y-6" id="devlogs-container"></div>
-      </section>
-      <!-- 7. Staff Directory -->
-      <section id="staff-section" class="space-y-8">
-        <div class="border-b border-nexusBorder pb-6">
-          <h2 class="font-display text-2xl font-bold text-white" data-i18n="staff_title">Administration Directory</h2>
-          <p class="text-xs text-nexusMuted mt-1" data-i18n="staff_desc">Our dedicated oversight team maintains server stability and player support around the clock.</p>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="staff-container"></div>
-      </section>
-      <!-- 8. Support Section -->
-      <section id="contact-section" class="space-y-8">
-        <div class="border-b border-nexusBorder pb-6">
-          <h2 class="font-display text-2xl font-bold text-white" data-i18n="support_title">Contact & Support Center</h2>
-          <p class="text-xs text-nexusMuted mt-1" data-i18n="support_desc">Need assistance with a store purchase, ban appeal, or bug report? Submit a ticket below.</p>
-        </div>
-        <div id="contact-page-container"></div>
-      </section>
-    </main>
-    <footer class="relative z-10 border-t border-nexusBorder mt-12">
-      <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-nexusMuted">
-        <span data-i18n="footer_rights">© 2026 Nexus RolePlay. Not affiliated with Rockstar Games or Cfx.re.</span>
-        <div class="flex items-center gap-4">
-          <a href="https://discord.gg/WsZfUBA5Jn" target="_blank" class="hover:text-white transition"><i class="fa-brands fa-discord"></i> Discord</a>
-          <a href="#" data-connect-link class="hover:text-white transition"><i class="fa-solid fa-play"></i> <span data-i18n="nav_connect">Connect</span></a>
+        <div class="sheet-cta">
+          <a class="btn btn-primary" data-connect-link href="#"><i class="fa-solid fa-play"></i><span data-i18n="nav_play">Play now</span></a>
+          <a class="btn btn-outline" data-discord-link href="#" target="_blank" rel="noopener"><i class="fa-brands fa-discord"></i><span>Discord</span></a>
         </div>
       </div>
+    </div>
+
+    <main id="main">
+      <!-- ===================== HERO ===================== -->
+      <section id="home" class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <div class="hero-badges">
+              <a class="announce" href="#updates" id="announce">
+                <span class="announce-tag" data-i18n="hero_new">New</span>
+                <span class="announce-text" id="announce-text"></span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+
+            <h1 class="hero-title">
+              <span class="hero-line split-words" id="hero-name">Nexus RolePlay</span>
+              <span class="hero-line rotator" id="rotator" aria-live="polite"></span>
+            </h1>
+
+            <p class="hero-desc hero-fade" style="--d:.35s" data-i18n="hero_desc"></p>
+
+            <div class="hero-cta hero-fade" style="--d:.45s">
+              <a class="btn btn-primary btn-lg btn-shine" data-connect-link data-magnetic href="#">
+                <i class="fa-solid fa-play"></i><span data-i18n="hero_play">Play now</span>
+              </a>
+              <a class="btn btn-outline btn-lg" data-discord-link data-magnetic href="#" target="_blank" rel="noopener">
+                <i class="fa-brands fa-discord"></i><span data-i18n="hero_discord">Join Discord</span>
+              </a>
+            </div>
+
+            <button type="button" class="connect-chip hero-fade" style="--d:.55s" data-copy-connect>
+              <span class="connect-chip-hint" data-i18n="hero_copy_hint">Press F8 in FiveM and paste</span>
+              <span class="connect-chip-cmd"><span class="prompt">&gt;</span> <code data-connect-cmd></code></span>
+              <span class="connect-chip-icon"><i class="fa-regular fa-copy"></i></span>
+            </button>
+
+            <div class="hero-meta hero-fade" style="--d:.65s">
+              <div class="avatar-stack" id="team-stack"></div>
+              <span id="hero-team"></span>
+              <span class="dot-sep"></span>
+              <span class="za-pill"><svg class="flag" aria-hidden="true"><use href="#flag-za"/></svg><span data-i18n="hero_za">Proudly South African</span></span>
+            </div>
+          </div>
+
+          <!-- Server card -->
+          <aside class="hero-card-wrap hero-fade" style="--d:.3s">
+            <div class="card server-card spotlight">
+              <div class="server-head">
+                <div class="server-id">
+                  <img src="nexus-logo.jpg" alt="">
+                  <div>
+                    <h2 data-i18n="card_title">Nexus Main Node</h2>
+                    <p class="mono" data-addr>--</p>
+                  </div>
+                </div>
+                <span class="status-pill" data-st-pill><span class="status-dot"></span><span data-st-pill-text></span></span>
+              </div>
+
+              <div class="server-players">
+                <div>
+                  <span class="big-num"><span data-st-players>--</span><span class="big-num-max">/<span data-st-max>--</span></span></span>
+                  <span class="muted small" data-i18n="card_players">players in the city</span>
+                </div>
+                <div class="spark-wrap">
+                  <span class="label" data-i18n="card_trend">Live trend</span>
+                  <div class="spark" data-spark>
+                    <svg viewBox="0 0 300 64" preserveAspectRatio="none"><path class="spark-area"/><path class="spark-line"/></svg>
+                    <span class="spark-dot"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="capacity">
+                <div class="capacity-row"><span data-i18n="card_capacity">Capacity</span><span class="mono" data-st-pct>0%</span></div>
+                <div class="progress"><span data-st-bar></span></div>
+              </div>
+
+              <dl class="facts">
+                <div><dt data-i18n="fact_framework">Framework</dt><dd data-cfg="framework"></dd></div>
+                <div><dt data-i18n="fact_voice">Voice</dt><dd data-cfg="voice"></dd></div>
+                <div><dt data-i18n="fact_region">Region</dt><dd><svg class="flag" aria-hidden="true"><use href="#flag-za"/></svg><span data-i18n="fact_region_val">Johannesburg, ZA</span></dd></div>
+                <div><dt data-i18n="fact_langs">Languages</dt><dd>EN · AF · FR</dd></div>
+              </dl>
+
+              <div class="server-actions">
+                <a class="btn btn-primary" data-connect-link href="#"><i class="fa-solid fa-plug"></i><span data-i18n="card_connect">Connect</span></a>
+                <a class="btn btn-outline" data-cfx-link href="#" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i><span data-i18n="card_web">cfx.re link</span></a>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Highlight marquee -->
+        <div class="marquee" aria-hidden="true">
+          <div class="marquee-track" id="marquee-track"></div>
+        </div>
+      </section>
+
+      <!-- ===================== STATS ===================== -->
+      <section class="stats-band" aria-label="Server stats">
+        <div class="container stats-grid">
+          <div class="stat" data-reveal><span class="stat-num"><span data-st-players>--</span></span><span class="stat-label" data-i18n="stat_online">Players online</span></div>
+          <div class="stat" data-reveal style="--d:80ms"><span class="stat-num"><span data-st-max>--</span></span><span class="stat-label" data-i18n="stat_slots">Player slots</span></div>
+          <div class="stat" data-reveal style="--d:160ms"><span class="stat-num" data-count="staff">0</span><span class="stat-label" data-i18n="stat_staff">Staff members</span></div>
+          <div class="stat" data-reveal style="--d:240ms"><span class="stat-num" data-count="updates">0</span><span class="stat-label" data-i18n="stat_updates">Updates shipped</span></div>
+        </div>
+      </section>
+
+      <!-- ===================== FEATURES ===================== -->
+      <section id="features" class="section">
+        <div class="container">
+          <header class="section-head" data-reveal>
+            <span class="eyebrow" data-i18n="features_eyebrow">Why Nexus</span>
+            <h2 class="section-title" data-i18n="features_title">Built for roleplay that matters.</h2>
+            <p class="section-desc" data-i18n="features_desc"></p>
+          </header>
+          <div class="bento" id="features-grid"></div>
+        </div>
+      </section>
+
+      <!-- ===================== HOW TO JOIN ===================== -->
+      <section id="join" class="section section--tight">
+        <div class="container">
+          <header class="section-head" data-reveal>
+            <span class="eyebrow" data-i18n="join_eyebrow">Getting started</span>
+            <h2 class="section-title" data-i18n="join_title">Three steps to the city.</h2>
+            <p class="section-desc" data-i18n="join_desc"></p>
+          </header>
+          <ol class="steps">
+            <li class="card step spotlight" data-reveal>
+              <span class="step-num"><span data-i18n="join_step">Step</span> 01</span>
+              <div class="step-icon"><i class="fa-solid fa-download"></i></div>
+              <h3 data-i18n="join_s1_title">Install FiveM</h3>
+              <p data-i18n="join_s1_desc"></p>
+              <a class="btn btn-ghost btn-sm" href="https://fivem.net/" target="_blank" rel="noopener"><span data-i18n="join_s1_btn">Download FiveM</span><i class="fa-solid fa-arrow-right"></i></a>
+            </li>
+            <li class="card step spotlight" data-reveal style="--d:100ms">
+              <span class="step-num"><span data-i18n="join_step">Step</span> 02</span>
+              <div class="step-icon"><i class="fa-brands fa-discord"></i></div>
+              <h3 data-i18n="join_s2_title">Join the Discord</h3>
+              <p data-i18n="join_s2_desc"></p>
+              <a class="btn btn-ghost btn-sm" data-discord-link href="#" target="_blank" rel="noopener"><span data-i18n="join_s2_btn">Open Discord</span><i class="fa-solid fa-arrow-right"></i></a>
+            </li>
+            <li class="card step spotlight" data-reveal style="--d:200ms">
+              <span class="step-num"><span data-i18n="join_step">Step</span> 03</span>
+              <div class="step-icon"><i class="fa-solid fa-play"></i></div>
+              <h3 data-i18n="join_s3_title">Connect &amp; play</h3>
+              <p data-i18n="join_s3_desc"></p>
+              <button type="button" class="btn btn-ghost btn-sm" data-copy-connect><span data-i18n="join_s3_btn">Copy command</span><i class="fa-regular fa-copy"></i></button>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ===================== STATUS ===================== -->
+      <section id="status" class="section">
+        <div class="container">
+          <header class="section-head section-head--row" data-reveal>
+            <div>
+              <span class="eyebrow eyebrow--live" data-i18n="status_eyebrow">Live</span>
+              <h2 class="section-title" data-i18n="status_title">Server status</h2>
+              <p class="section-desc" data-i18n="status_desc"></p>
+            </div>
+            <div class="refresh">
+              <div class="ring" title="">
+                <svg viewBox="0 0 36 36"><circle class="ring-bg" cx="18" cy="18" r="16"/><circle class="ring-fg" id="ring-fg" cx="18" cy="18" r="16"/></svg>
+                <span class="ring-num mono" id="countdown">15</span>
+              </div>
+              <span class="muted small" data-i18n="status_next">Next check</span>
+              <button type="button" class="btn btn-outline btn-sm" id="refresh-btn"><i class="fa-solid fa-rotate" id="refresh-icon"></i><span data-i18n="status_refresh">Refresh</span></button>
+            </div>
+          </header>
+
+          <div class="status-grid">
+            <div class="card stat-card spotlight" data-reveal>
+              <div class="stat-card-head"><span data-i18n="st_state">Server state</span><i class="fa-solid fa-signal"></i></div>
+              <div class="stat-card-value" data-st-state><span class="status-dot"></span><span data-st-pill-text></span></div>
+              <p class="stat-card-sub" data-st-state-sub></p>
+            </div>
+            <div class="card stat-card spotlight" data-reveal style="--d:80ms">
+              <div class="stat-card-head"><span data-i18n="st_players">Players online</span><i class="fa-solid fa-users"></i></div>
+              <div class="stat-card-value mono"><span data-st-players>--</span></div>
+              <p class="stat-card-sub" data-st-players-sub></p>
+            </div>
+            <div class="card stat-card spotlight" data-reveal style="--d:160ms">
+              <div class="stat-card-head"><span data-i18n="st_capacity">Capacity</span><i class="fa-solid fa-gauge-high"></i></div>
+              <div class="stat-card-value mono" data-st-pct>0%</div>
+              <div class="progress"><span data-st-bar></span></div>
+            </div>
+            <button type="button" class="card stat-card stat-card--btn spotlight" data-reveal style="--d:240ms" data-copy-connect>
+              <div class="stat-card-head"><span data-i18n="st_address">Server address</span><i class="fa-regular fa-copy"></i></div>
+              <div class="stat-card-value stat-card-value--sm mono" data-addr>--</div>
+              <p class="stat-card-sub" data-i18n="st_address_sub">Click to copy connect command</p>
+            </button>
+          </div>
+
+          <div class="card players-card" data-reveal>
+            <div class="players-head">
+              <h3><i class="fa-solid fa-city"></i> <span data-i18n="players_title">In the city right now</span> <span class="count-badge" data-st-players>--</span></h3>
+              <label class="input-icon">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" id="player-search" data-i18n-ph="players_search" placeholder="Search players…" autocomplete="off">
+              </label>
+            </div>
+            <div class="players-body">
+              <ul class="player-list" id="player-list"></ul>
+              <div class="players-spark">
+                <span class="label" data-i18n="card_trend">Live trend</span>
+                <div class="spark spark--tall" data-spark>
+                  <svg viewBox="0 0 300 64" preserveAspectRatio="none"><path class="spark-area"/><path class="spark-line"/></svg>
+                  <span class="spark-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== RULES ===================== -->
+      <section id="rules" class="section">
+        <div class="container">
+          <header class="section-head section-head--row" data-reveal>
+            <div>
+              <span class="eyebrow" data-i18n="rules_eyebrow">Code of conduct</span>
+              <h2 class="section-title" data-i18n="rules_title">Server rules</h2>
+              <p class="section-desc" data-i18n="rules_desc"></p>
+            </div>
+            <label class="input-icon input-icon--lg">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="search" id="rules-search" data-i18n-ph="rules_search" placeholder="Search rules…" autocomplete="off">
+            </label>
+          </header>
+
+          <div class="tabs-wrap" data-reveal>
+            <div class="tabs" id="rules-tabs" role="tablist" aria-label="Rule categories">
+              <span class="tab-indicator" id="tab-indicator"></span>
+            </div>
+          </div>
+          <div class="rules-grid" id="rules-grid" role="tabpanel"></div>
+          <p class="rules-note"><i class="fa-solid fa-circle-info"></i> <span data-i18n="rules_note"></span></p>
+        </div>
+      </section>
+
+      <!-- ===================== MEDIA ===================== -->
+      <section id="media" class="section">
+        <div class="container">
+          <header class="section-head" data-reveal>
+            <span class="eyebrow" data-i18n="media_eyebrow">Gallery</span>
+            <h2 class="section-title" data-i18n="media_title">Life in the city</h2>
+            <p class="section-desc" data-i18n="media_desc"></p>
+          </header>
+          <div class="media-grid" id="media-grid"></div>
+        </div>
+      </section>
+
+      <!-- ===================== UPDATES ===================== -->
+      <section id="updates" class="section">
+        <div class="container updates-layout">
+          <header class="section-head updates-head" data-reveal>
+            <span class="eyebrow" data-i18n="updates_eyebrow">Changelog</span>
+            <h2 class="section-title" data-i18n="updates_title">Development logs</h2>
+            <p class="section-desc" data-i18n="updates_desc"></p>
+          </header>
+          <div>
+            <ol class="timeline" id="timeline"></ol>
+            <button type="button" class="btn btn-outline btn-sm timeline-toggle" id="timeline-toggle" hidden></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STAFF ===================== -->
+      <section id="staff" class="section">
+        <div class="container">
+          <header class="section-head" data-reveal>
+            <span class="eyebrow" data-i18n="staff_eyebrow">The team</span>
+            <h2 class="section-title" data-i18n="staff_title">Meet the staff</h2>
+            <p class="section-desc" data-i18n="staff_desc"></p>
+          </header>
+          <div class="staff-grid" id="staff-grid"></div>
+        </div>
+      </section>
+
+      <!-- ===================== FAQ ===================== -->
+      <section id="faq" class="section">
+        <div class="container faq-layout">
+          <header class="section-head" data-reveal>
+            <span class="eyebrow" data-i18n="faq_eyebrow">FAQ</span>
+            <h2 class="section-title" data-i18n="faq_title">Questions, answered.</h2>
+            <p class="section-desc" data-i18n="faq_desc"></p>
+            <a class="btn btn-outline btn-sm" href="#support"><i class="fa-solid fa-ticket"></i><span data-i18n="faq_cta">Open a ticket</span></a>
+          </header>
+          <div class="accordion" id="faq-list" data-reveal></div>
+        </div>
+      </section>
+
+      <!-- ===================== SUPPORT ===================== -->
+      <section id="support" class="section">
+        <div class="container">
+          <header class="section-head" data-reveal>
+            <span class="eyebrow" data-i18n="support_eyebrow">Support</span>
+            <h2 class="section-title" data-i18n="support_title">Need a hand?</h2>
+            <p class="section-desc" data-i18n="support_desc"></p>
+          </header>
+
+          <div class="support-layout">
+            <div class="support-side">
+              <a class="card info-card spotlight" data-discord-link href="#" target="_blank" rel="noopener" data-reveal>
+                <span class="info-icon"><i class="fa-brands fa-discord"></i></span>
+                <span><strong data-i18n="support_discord_title">Fastest: Discord</strong><small data-i18n="support_discord_desc"></small></span>
+                <i class="fa-solid fa-arrow-up-right-from-square info-go"></i>
+              </a>
+              <div class="card info-card" data-reveal style="--d:80ms">
+                <span class="info-icon"><i class="fa-regular fa-clock"></i></span>
+                <span><strong data-i18n="support_ticket_title">Ticket response</strong><small data-i18n="support_ticket_desc"></small></span>
+              </div>
+              <div class="card info-card" data-reveal style="--d:160ms">
+                <span class="info-icon"><i class="fa-solid fa-language"></i></span>
+                <span><strong data-i18n="support_lang_title">Your language</strong><small data-i18n="support_lang_desc"></small></span>
+              </div>
+            </div>
+
+            <form class="card ticket-form" id="ticket-form" novalidate data-reveal style="--d:120ms">
+              <h3><i class="fa-solid fa-ticket"></i> <span data-i18n="form_title">Open a support ticket</span></h3>
+              <div class="form-row">
+                <label class="field">
+                  <span data-i18n="form_name">Your name</span>
+                  <input type="text" name="name" required maxlength="64" data-i18n-ph="form_name_ph" autocomplete="name">
+                </label>
+                <label class="field">
+                  <span data-i18n="form_discord">Discord username</span>
+                  <input type="text" name="discord" required maxlength="64" data-i18n-ph="form_discord_ph" autocomplete="off">
+                </label>
+              </div>
+              <label class="field">
+                <span data-i18n="form_category">Inquiry type</span>
+                <span class="select">
+                  <select name="category">
+                    <option value="store" data-i18n="cat_store">Store / donation issue</option>
+                    <option value="ban" data-i18n="cat_ban">Ban appeal</option>
+                    <option value="bug" data-i18n="cat_bug">Bug report / server issue</option>
+                    <option value="other" data-i18n="cat_other">General inquiry</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </label>
+              <label class="field">
+                <span class="field-row"><span data-i18n="form_message">Message</span><span class="counter mono" id="msg-counter">0 / 1500</span></span>
+                <textarea name="message" rows="5" required minlength="10" maxlength="1500" data-i18n-ph="form_message_ph"></textarea>
+              </label>
+              <!-- Honeypot: real users never see or fill this -->
+              <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+              <button type="submit" class="btn btn-primary btn-block" id="ticket-submit">
+                <i class="fa-solid fa-paper-plane"></i><span data-i18n="form_submit">Submit ticket</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CTA ===================== -->
+      <section class="section section--tight">
+        <div class="container">
+          <div class="cta" data-reveal>
+            <div class="cta-glow" aria-hidden="true"></div>
+            <img src="nexus-logo.jpg" alt="" class="cta-logo">
+            <h2 data-i18n="cta_title">Your story starts tonight.</h2>
+            <p data-i18n="cta_desc"></p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-lg btn-shine" data-connect-link data-magnetic href="#"><i class="fa-solid fa-play"></i><span data-i18n="hero_play">Play now</span></a>
+              <a class="btn btn-outline btn-lg" data-discord-link data-magnetic href="#" target="_blank" rel="noopener"><i class="fa-brands fa-discord"></i><span data-i18n="hero_discord">Join Discord</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="#home"><img src="nexus-logo.jpg" alt=""><span class="brand-text"><strong>Nexus</strong><small>RolePlay V1</small></span></a>
+          <p data-i18n="footer_desc"></p>
+          <span class="za-pill"><svg class="flag" aria-hidden="true"><use href="#flag-za"/></svg><span data-i18n="hero_za">Proudly South African</span></span>
+        </div>
+        <div>
+          <h4 data-i18n="footer_nav">Explore</h4>
+          <ul>
+            <li><a href="#features" data-i18n="nav_features">Features</a></li>
+            <li><a href="#join" data-i18n="nav_join">Join</a></li>
+            <li><a href="#status" data-i18n="nav_status">Status</a></li>
+            <li><a href="#rules" data-i18n="nav_rules">Rules</a></li>
+            <li><a href="#updates" data-i18n="nav_updates">Updates</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 data-i18n="footer_community">Community</h4>
+          <ul>
+            <li><a data-discord-link href="#" target="_blank" rel="noopener"><i class="fa-brands fa-discord"></i> Discord</a></li>
+            <li><a data-cfx-link href="#" target="_blank" rel="noopener"><i class="fa-solid fa-server"></i> <span data-i18n="footer_cfx">Server page</span></a></li>
+            <li><a href="#staff" data-i18n="nav_staff">Staff</a></li>
+            <li><a href="#support" data-i18n="nav_support">Support</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 data-i18n="footer_lang">Language</h4>
+          <div class="lang-list">
+            <button type="button" data-lang="en"><span class="lang-code">EN</span> English</button>
+            <button type="button" data-lang="af"><span class="lang-code">AF</span> Afrikaans</button>
+            <button type="button" data-lang="fr"><span class="lang-code">FR</span> Français</button>
+          </div>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span data-i18n="footer_rights"></span>
+        <span data-i18n="footer_disclaimer"></span>
+      </div>
     </footer>
-    <!-- Toast notifications -->
-    <div id="toast-host"></div>
-    <script src="config.js"></script>
+
+    <!-- Back to top -->
+    <button type="button" class="to-top" id="to-top" data-i18n-aria="back_top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+    <!-- Command palette -->
+    <dialog class="cmdk" id="cmdk" aria-label="Command palette">
+      <div class="cmdk-panel">
+        <label class="cmdk-input">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="cmdk-input" data-i18n-ph="cmd_placeholder" autocomplete="off" spellcheck="false" role="combobox" aria-controls="cmdk-list" aria-expanded="true">
+          <kbd>Esc</kbd>
+        </label>
+        <div class="cmdk-list" id="cmdk-list" role="listbox"></div>
+        <div class="cmdk-foot">
+          <span><kbd>↑</kbd><kbd>↓</kbd> <span data-i18n="cmd_hint_nav">navigate</span></span>
+          <span><kbd>↵</kbd> <span data-i18n="cmd_hint_run">select</span></span>
+          <span><kbd>Esc</kbd> <span data-i18n="cmd_hint_close">close</span></span>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Lightbox -->
+    <dialog class="lightbox" id="lightbox" aria-label="Image viewer">
+      <button type="button" class="icon-btn lb-close" data-lb="close" data-i18n-aria="media_close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" class="icon-btn lb-nav lb-prev" data-lb="prev" data-i18n-aria="media_prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+      <figure>
+        <img id="lb-img" alt="">
+        <figcaption><strong id="lb-title"></strong><span id="lb-desc"></span><span class="mono" id="lb-count"></span></figcaption>
+      </figure>
+      <button type="button" class="icon-btn lb-nav lb-next" data-lb="next" data-i18n-aria="media_next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+    </dialog>
+
+    <!-- Toasts -->
+    <div class="toaster" id="toaster" aria-live="polite"></div>
+
     <script src="script.js"></script>
-    <!-- Language Translation Script -->
-    <script>
-      const translations = {
-        en: {
-          "guard_welcome": "Welcome To",
-          "guard_subtitle": "RolePlay V1",
-          "guard_click": "Click Anywhere To Enter",
-          "nav_community": "FiveM Community",
-          "nav_home": "Home",
-          "nav_status": "Status",
-          "nav_rules": "Rules",
-          "nav_media": "Media",
-          "nav_devlogs": "Dev Logs",
-          "nav_staff": "Staff",
-          "nav_support": "Support",
-          "nav_connect": "Connect",
-          "hero_badge": "V1 Framework Live • 48 Slot Optimized",
-          "hero_desc": "Step into a living economy featuring custom scripted frameworks, dedicated emergency dispatch infrastructure, and serious, story-driven civilians.",
-          "hero_launch": "Launch FiveM Server",
-          "hero_discord": "Join Discord",
-          "stat_status_lbl": "Status",
-          "stat_pop_lbl": "Population",
-          "stat_addr_lbl": "Address",
-          "checking": "Checking…",
-          "card_title": "Nexus Main Node",
-          "live_vitals": "Live Vitals",
-          "feat_framework": "Active Framework",
-          "feat_voice": "Voice Synchronization",
-          "feat_anticheat": "Anti-Cheat Protection",
-          "feat_shield": "Active Shield",
-          "card_launcher": "Direct Connect Launcher",
-          "telemetry_badge": "Live Telemetry Grid",
-          "telemetry_title": "System Status & Diagnostics",
-          "telemetry_desc_pre": "Queried directly from",
-          "telemetry_desc_post": "every 15 seconds — no manual updates needed.",
-          "refreshes_in": "Refreshes in",
-          "refresh_now": "Refresh Now",
-          "grid_status_lbl": "Active Server Status",
-          "grid_status_sub": "Contacting server address…",
-          "grid_players_lbl": "Active Server Players",
-          "grid_players_sub": "Live Player Count",
-          "grid_query_lbl": "Query Result",
-          "grid_query_sub": "Waiting on first check",
-          "grid_addr_lbl": "Server Address",
-          "grid_addr_sub": "Set in config.js",
-          "rules_title": "Community & Server Rules",
-          "rules_desc": "Review our structured code of conduct to ensure fair, immersive, and high-quality roleplay for all citizens.",
-          "media_title": "Community Media Gallery",
-          "media_desc": "Check out community screenshots, highlights, and promotional media.",
-          "devlogs_title": "Development Logs",
-          "devlogs_desc": "Track the latest updates, script optimizations, and framework patches.",
-          "staff_title": "Administration Directory",
-          "staff_desc": "Our dedicated oversight team maintains server stability and player support around the clock.",
-          "support_title": "Contact & Support Center",
-          "support_desc": "Need assistance with a store purchase, ban appeal, or bug report? Submit a ticket below.",
-          "footer_rights": "© 2026 Nexus RolePlay. Not affiliated with Rockstar Games or Cfx.re."
-        },
-        fr: {
-          "guard_welcome": "Bienvenue sur",
-          "guard_subtitle": "RolePlay V1",
-          "guard_click": "Cliquez n'importe où pour entrer",
-          "nav_community": "Communauté FiveM",
-          "nav_home": "Accueil",
-          "nav_status": "Statut",
-          "nav_rules": "Règlement",
-          "nav_media": "Médias",
-          "nav_devlogs": "Notes de MàJ",
-          "nav_staff": "Équipe",
-          "nav_support": "Support",
-          "nav_connect": "Rejoindre",
-          "hero_badge": "Framework V1 en ligne • 48 Slots Optimisés",
-          "hero_desc": "Plongez dans une économie vivante dotée de scripts personnalisés, d'une infrastructure de secours dédiée et de scènes RP immersives.",
-          "hero_launch": "Lancer le serveur FiveM",
-          "hero_discord": "Rejoindre le Discord",
-          "stat_status_lbl": "Statut",
-          "stat_pop_lbl": "Population",
-          "stat_addr_lbl": "Adresse",
-          "checking": "Vérification…",
-          "card_title": "Nœud Principal Nexus",
-          "live_vitals": "Signes Vitaux",
-          "feat_framework": "Framework Actif",
-          "feat_voice": "Synchronisation Vocale",
-          "feat_anticheat": "Protection Anti-Cheat",
-          "feat_shield": "Bouclier Actif",
-          "card_launcher": "Lanceur Connexion Directe",
-          "telemetry_badge": "Grille de Télémétrie",
-          "telemetry_title": "État du Système & Diagnostics",
-          "telemetry_desc_pre": "Interrogé directement depuis",
-          "telemetry_desc_post": "toutes les 15 secondes — aucune mise à jour manuelle requise.",
-          "refreshes_in": "Actualisation dans",
-          "refresh_now": "Actualiser",
-          "grid_status_lbl": "Statut Actif du Serveur",
-          "grid_status_sub": "Connexion à l'adresse du serveur…",
-          "grid_players_lbl": "Joueurs Actifs",
-          "grid_players_sub": "Nombre de joueurs en direct",
-          "grid_query_lbl": "Résultat de la Requête",
-          "grid_query_sub": "En attente de la première vérification",
-          "grid_addr_lbl": "Adresse du Serveur",
-          "grid_addr_sub": "Défini dans config.js",
-          "rules_title": "Règlement de la Communauté",
-          "rules_desc": "Consultez notre code de conduite structuré pour garantir un roleplay équitable et de haute qualité.",
-          "media_title": "Galerie Multimédia",
-          "media_desc": "Découvrez les captures d'écran, moments forts et médias promotionnels de la communauté.",
-          "devlogs_title": "Journaux de Développement",
-          "devlogs_desc": "Suivez les dernières mises à jour, optimisations de scripts et correctifs.",
-          "staff_title": "Annuaire de l'Administration",
-          "staff_desc": "Notre équipe de modération veille à la stabilité du serveur et accompagne les joueurs 24h/24.",
-          "support_title": "Centre de Support & Contact",
-          "support_desc": "Besoin d'aide pour un achat boutique, une réclamation de ban ou un bug ? Soumettez un ticket ci-dessous.",
-          "footer_rights": "© 2026 Nexus RolePlay. Non affilié à Rockstar Games ou Cfx.re."
-        }
-      };
 
-      function switchLanguage(lang) {
-        localStorage.setItem('nexus_lang', lang);
-        const btnEn = document.getElementById('btn-en');
-        const btnFr = document.getElementById('btn-fr');
-        if (btnEn && btnFr) {
-          btnEn.style.background = lang === 'en' ? '#3b82f6' : '#1f2937';
-          btnEn.style.color = lang === 'en' ? 'white' : '#94a3b8';
-          btnFr.style.background = lang === 'fr' ? '#3b82f6' : '#1f2937';
-          btnFr.style.color = lang === 'fr' ? 'white' : '#94a3b8';
-        }
-        const elements = document.querySelectorAll('[data-i18n]');
-        elements.forEach(el => {
-          const key = el.getAttribute('data-i18n');
-          if (translations[lang] && translations[lang][key]) {
-            el.textContent = translations[lang][key];
-          }
-        });
-        document.documentElement.setAttribute('lang', lang);
-      }
-
-      window.addEventListener('DOMContentLoaded', () => {
-        const savedLang = localStorage.getItem('nexus_lang') || 'en';
-        switchLanguage(savedLang);
-      });
-    </script>
-    <!-- Vercel Web Analytics & Speed Insights (plain-HTML integration). Only reports data once this site is actually deployed on Vercel — these script paths are served by Vercel's edge network, so they'll 404 harmlessly on any other host or when running locally. -->
+    <!-- Vercel Web Analytics & Speed Insights. These paths only exist when deployed on Vercel; they 404 harmlessly elsewhere. -->
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-    <script>
       window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
     </script>
+    <script defer src="/_vercel/insights/script.js"></script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
   </body>
 </html>
