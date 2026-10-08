@@ -186,7 +186,16 @@ window.SERVER_CONFIG = {
     --------------------------------------------------------- */
     devLogs: [
         {
-            version: "V2.6", type: "release", date: "2026-09", latest: true,
+            version: "V2.7", type: "release", date: "2026-10", latest: true,
+            title: { en: "Rainmad Job Pack, Script Optimisation & New VPS", af: "Rainmad-werkpakket, skripoptimering en nuwe VPS", fr: "Pack de métiers Rainmad, optimisation des scripts et nouveau VPS" },
+            desc: {
+                en: "Added the job pack from Rainmad (check Rainmad for full job details), optimised our scripts for better performance, and migrated to a new VPS. We're almost ready for launch!",
+                af: "Die werkpakket van Rainmad bygevoeg (kyk by Rainmad vir volledige werkbesonderhede), ons skrips vir beter werkverrigting geoptimeer en na 'n nuwe VPS geskuif. Ons is amper gereed vir bekendstelling!",
+                fr: "Ajout du pack de métiers de Rainmad (consultez Rainmad pour tous les détails des métiers), optimisation de nos scripts pour de meilleures performances et migration vers un nouveau VPS. Le lancement approche !"
+            }
+        },
+        {
+            version: "V2.6", type: "release", date: "2026-09",
             title: { en: "Advanced Banking System & Dynamic NPC Robberies", af: "Gevorderde bankstelsel en dinamiese NPC-rooftogte", fr: "Système bancaire avancé et braquages PNJ dynamiques" },
             desc: {
                 en: "Implemented a fully revamped banking system with multi-account management, credit limits, and automated transaction histories, alongside dynamic NPC store robberies with escalating police response triggers.",
