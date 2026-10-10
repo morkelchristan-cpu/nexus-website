@@ -158,6 +158,7 @@ function renderAll() {
     renderMedia();
     renderUpdates();
     renderStaff();
+    renderStreamers();
     renderFaq();
     renderStatus();
     if ($("#cmdk").open) renderCommands();
@@ -1026,6 +1027,81 @@ function bindTilt(root) {
 }
 
 /* ---------------------------------------------------------
+   14b. STREAMERS
+--------------------------------------------------------- */
+const PLATFORMS = {
+    twitch: { label: "Twitch", icon: "fa-brands fa-twitch" },
+    youtube: { label: "YouTube", icon: "fa-brands fa-youtube" },
+    kick: { label: "Kick", icon: "fa-solid fa-k" },
+    tiktok: { label: "TikTok", icon: "fa-brands fa-tiktok" },
+    x: { label: "X", icon: "fa-brands fa-x-twitter" },
+    instagram: { label: "Instagram", icon: "fa-brands fa-instagram" }
+};
+
+// Only http(s) links make it into an href.
+function safeUrl(u) {
+    return /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "";
+}
+
+function renderStreamers() {
+    const grid = $("#streamer-grid");
+    const cards = (CFG.streamers || []).map((s, i) => {
+        const key = PLATFORMS[s.platform] ? s.platform : "twitch";
+        const p = PLATFORMS[key];
+        const url = safeUrl(s.url);
+        const banner = safeUrl(s.banner);
+        const avatar = safeUrl(s.avatar);
+        const initial = esc((s.name || "?").charAt(0).toUpperCase());
+        const socials = Object.entries(s.socials || {})
+            .map(([k, u]) => [k, safeUrl(u)])
+            .filter(([k, u]) => u && PLATFORMS[k])
+            .map(([k, u]) => `<a class="icon-btn" href="${esc(u)}" target="_blank" rel="noopener" aria-label="${esc(s.name)} — ${PLATFORMS[k].label}" title="${PLATFORMS[k].label}"><i class="${PLATFORMS[k].icon}"></i></a>`)
+            .join("");
+        return `
+        <article class="card streamer spotlight pf-${key}" data-reveal style="--d:${(i % 3) * 80}ms">
+            <div class="streamer-banner">${banner ? `<img src="${esc(banner)}" alt="" loading="lazy" data-hide-on-error>` : ""}</div>
+            <div class="streamer-body">
+                <div class="streamer-top">
+                    <div class="streamer-av">${avatar
+                        ? `<img src="${esc(avatar)}" alt="${esc(s.name)}" loading="lazy" data-fallback="${initial}">`
+                        : initial}</div>
+                    <span class="platform-pill"><i class="${p.icon}"></i>${p.label}</span>
+                </div>
+                <h3 class="streamer-name">${esc(s.name)}</h3>
+                ${s.character ? `<p class="streamer-char"><i class="fa-solid fa-masks-theater"></i>${esc(t("streamers_plays"))} <strong>${esc(L(s.character))}</strong></p>` : ""}
+                ${s.bio ? `<p class="streamer-bio">${esc(L(s.bio))}</p>` : ""}
+                ${s.schedule ? `<p class="streamer-sched"><i class="fa-regular fa-calendar"></i><span>${esc(t("streamers_schedule"))}: ${esc(L(s.schedule))}</span></p>` : ""}
+                <div class="streamer-actions">
+                    ${url ? `<a class="btn btn-primary btn-sm" href="${esc(url)}" target="_blank" rel="noopener"><i class="${p.icon}"></i><span>${esc(t("streamers_watch", { platform: p.label }))}</span></a>` : ""}
+                    ${socials}
+                </div>
+            </div>
+        </article>`;
+    });
+
+    // Always end with an invite so the section is useful even when empty.
+    cards.push(`
+        <article class="card streamer streamer-apply" data-reveal style="--d:${(cards.length % 3) * 80}ms">
+            <span class="feature-icon"><i class="fa-solid fa-video"></i></span>
+            <h3>${esc(t("streamers_apply_title"))}</h3>
+            <p>${esc(t("streamers_apply_desc"))}</p>
+            <a class="btn btn-outline btn-sm" href="#support" data-apply-streamer><i class="fa-solid fa-paper-plane"></i><span>${esc(t("streamers_apply_btn"))}</span></a>
+        </article>`);
+
+    grid.innerHTML = cards.join("");
+
+    if (!grid.dataset.bound) {
+        grid.dataset.bound = "1";
+        grid.addEventListener("click", (e) => {
+            if (!e.target.closest("[data-apply-streamer]")) return;
+            const form = $("#ticket-form");
+            form.elements.category.value = "streamer";
+            setTimeout(() => form.elements.name.focus({ preventScroll: true }), 600);
+        });
+    }
+}
+
+/* ---------------------------------------------------------
    15. FAQ ACCORDION
 --------------------------------------------------------- */
 function renderFaq() {
@@ -1160,7 +1236,8 @@ function commandList() {
     const nav = [
         ["home", "nav_home", "fa-house"], ["features", "nav_features", "fa-star"], ["join", "nav_join", "fa-right-to-bracket"],
         ["status", "nav_status", "fa-signal"], ["rules", "nav_rules", "fa-scale-balanced"], ["media", "nav_media", "fa-images"],
-        ["updates", "nav_updates", "fa-code-branch"], ["staff", "nav_staff", "fa-user-shield"], ["faq", "nav_faq", "fa-circle-question"],
+        ["updates", "nav_updates", "fa-code-branch"], ["staff", "nav_staff", "fa-user-shield"], ["streamers", "nav_streamers", "fa-video"],
+        ["faq", "nav_faq", "fa-circle-question"],
         ["support", "nav_support", "fa-headset"]
     ].map(([id, key, icon]) => ({
         group: t("cmd_nav"), icon: `fa-solid ${icon}`, label: t(key),

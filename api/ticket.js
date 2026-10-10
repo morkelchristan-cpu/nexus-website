@@ -11,6 +11,7 @@ const CATEGORY_LABELS = {
     store: "Store / Donation Issue",
     ban: "Ban Appeal",
     bug: "Bug Report / Server Issue",
+    streamer: "Streamer Application",
     other: "General Inquiry"
 };
 const LANG_LABELS = { en: "English", af: "Afrikaans", fr: "Français" };

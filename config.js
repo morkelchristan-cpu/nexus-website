@@ -180,6 +180,30 @@ window.SERVER_CONFIG = {
     ],
 
     /* ---------------------------------------------------------
+       Streamers — creators who stream on Nexus.
+       platform: "twitch" | "youtube" | "kick" | "tiktok"
+       url:      link to their channel (the "Watch" button)
+       character: who they play in the city (optional)
+       schedule:  when they're usually live (optional)
+       socials:   extra links, any of: twitch, youtube, kick,
+                  tiktok, x, instagram (optional)
+       Blank avatar = initial badge. Blank banner = gradient.
+
+       Copy this template into the list below to add someone:
+        {
+            name: "StreamerName", platform: "twitch",
+            url: "https://twitch.tv/streamername",
+            avatar: "", banner: "",
+            character: "Character Name",
+            bio: { en: "Short intro.", af: "Kort inleiding.", fr: "Courte présentation." },
+            schedule: { en: "Fri & Sat · 20:00", af: "Vr & Sa · 20:00", fr: "Ven & Sam · 20h00" },
+            socials: { youtube: "https://youtube.com/@streamername", tiktok: "" }
+        },
+    --------------------------------------------------------- */
+    streamers: [
+    ],
+
+    /* ---------------------------------------------------------
        Development logs (newest first)
        date: "YYYY-MM" (shown as a localised month)
        type: "release" | "patch"
